@@ -22,6 +22,7 @@ func loggingInterceptor(ctx context.Context, req any, info *grpc.UnaryServerInfo
 		"code", status.Code(err).String(),
 		"duration_ms", time.Since(start).Milliseconds(),
 		"trace_id", span.TraceID().String(),
+		"span_id", span.SpanID().String(),
 	)
 
 	return resp, err

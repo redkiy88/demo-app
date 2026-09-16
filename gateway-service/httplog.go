@@ -35,6 +35,7 @@ func requestLogger(next http.Handler) http.Handler {
 			"status", rec.status,
 			"duration_ms", time.Since(start).Milliseconds(),
 			"trace_id", span.TraceID().String(),
+			"span_id", span.SpanID().String(),
 		)
 	})
 }

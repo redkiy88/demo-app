@@ -11,8 +11,10 @@ import (
 	"sync"
 	"time"
 
-	"go.opentelemetry.io/otel/trace"
+	"go.opentelemetry.io/otel"
 )
+
+var tracer = otel.Tracer("weather-service")
 
 const cacheTTL = 5 * time.Minute
 
@@ -87,6 +89,13 @@ func (c *weatherClient) fetch(ctx context.Context, lat, lon float64) (currentWea
 
 	reqURL := "https://api.open-meteo.com/v1/forecast?" + q.Encode()
 
+	// Explicit span (rather than relying solely on otelhttp's transport-level
+	// auto-instrumentation) so the span_id we log matches the span a human
+	// would actually click on in Tempo for this specific outbound call.
+	ctx, opSpan := tracer.Start(ctx, "fetch-open-meteo")
+	defer opSpan.End()
+	span := opSpan.SpanContext()
+
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, reqURL, nil)
 	if err != nil {
 		return currentWeather{}, fmt.Errorf("build request: %w", err)
@@ -95,15 +104,14 @@ func (c *weatherClient) fetch(ctx context.Context, lat, lon float64) (currentWea
 	start := time.Now()
 	resp, err := c.httpClient.Do(req)
 	duration := time.Since(start).Milliseconds()
-	span := trace.SpanContextFromContext(ctx)
 
 	if err != nil {
-		slog.Error("outbound http request", "target", "open-meteo", "duration_ms", duration, "trace_id", span.TraceID().String(), "error", err)
+		slog.Error("outbound http request", "target", "open-meteo", "duration_ms", duration, "trace_id", span.TraceID().String(), "span_id", span.SpanID().String(), "error", err)
 		return currentWeather{}, fmt.Errorf("call open-meteo: %w", err)
 	}
 	defer resp.Body.Close()
 
-	slog.Info("outbound http request", "target", "open-meteo", "status", resp.StatusCode, "duration_ms", duration, "trace_id", span.TraceID().String())
+	slog.Info("outbound http request", "target", "open-meteo", "status", resp.StatusCode, "duration_ms", duration, "trace_id", span.TraceID().String(), "span_id", span.SpanID().String())
 
 	if resp.StatusCode != http.StatusOK {
 		return currentWeather{}, fmt.Errorf("open-meteo returned status %s", resp.Status)
