@@ -74,7 +74,15 @@ an undisclosed daily download limit, so:
 - `POST /internal/update-db` on `geoip-service` (cluster-internal only) forces a
   refresh, but refuses with `429` if less than 24h have passed since the last download.
 
-## Build & push images
+## CI
+
+`.github/workflows/build-push.yml` builds and pushes all 4 images to GHCR on
+every push to `main` (tags: `sha-<short-sha>` and `latest`). It's build+push
+only — nothing auto-deploys to the cluster, that stays a manual step below
+with an explicit version tag (deliberate: the API server isn't public, and
+this avoids storing kubeconfig in GitHub secrets for a lab).
+
+## Build & push images (manual/local)
 
 ```bash
 export GITHUB_TOKEN=...   # from ~/Desktop/DevOps/.env, needs write:packages
