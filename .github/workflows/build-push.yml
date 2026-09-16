@@ -12,6 +12,7 @@ jobs:
   build-push:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         include:
           - image: geoip-service
