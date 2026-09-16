@@ -25,7 +25,7 @@ spec:
 
       containers:
         - name: weather-service
-          image: ghcr.io/redkiy88/weather-service:1.0.1
+          image: ghcr.io/redkiy88/weather-service:sha-cdbbe90
 
           ports:
             - name: grpc
