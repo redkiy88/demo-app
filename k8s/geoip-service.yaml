@@ -41,7 +41,7 @@ spec:
 
       containers:
         - name: geoip-service
-          image: ghcr.io/redkiy88/geoip-service:sha-f844042
+          image: ghcr.io/redkiy88/geoip-service:sha-ce18be8
 
           env:
             - name: DB_PATH
