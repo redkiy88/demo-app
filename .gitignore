@@ -1,2 +1,8 @@
-demo-app
-*.exe
+node_modules/
+dist/
+*.mmdb
+.env
+.env.*
+geoip-service/geoip-service
+gateway-service/gateway-service
+weather-service/weather-service

@@ -1,0 +1,117 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: geoip-db
+  namespace: demo
+spec:
+  accessModes: ["ReadWriteOnce"]
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 200Mi
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: geoip-service
+  namespace: demo
+spec:
+  # Single replica: the PVC (local-path) is node-pinned, and lookups are
+  # microseconds, so there's no reason to scale this out.
+  replicas: 1
+  selector:
+    matchLabels:
+      app: geoip-service
+  template:
+    metadata:
+      labels:
+        app: geoip-service
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        fsGroup: 65532
+        seccompProfile:
+          type: RuntimeDefault
+
+      imagePullSecrets:
+        - name: ghcr-creds
+
+      containers:
+        - name: geoip-service
+          image: ghcr.io/redkiy88/geoip-service:1.0.1
+
+          env:
+            - name: DB_PATH
+              value: /data/GeoLite2-City.mmdb
+            - name: MAXMIND_ACCOUNT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: maxmind
+                  key: account_id
+            - name: MAXMIND_LICENSE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: maxmind
+                  key: license_key
+
+          ports:
+            - name: grpc
+              containerPort: 9090
+            - name: internal-http
+              containerPort: 8081
+
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+
+          volumeMounts:
+            - name: geoip-db
+              mountPath: /data
+
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: internal-http
+            initialDelaySeconds: 2
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: internal-http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+
+          resources:
+            requests:
+              cpu: "20m"
+              memory: "48Mi"
+            limits:
+              cpu: "200m"
+              memory: "160Mi"
+
+      volumes:
+        - name: geoip-db
+          persistentVolumeClaim:
+            claimName: geoip-db
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: geoip-service
+  namespace: demo
+spec:
+  selector:
+    app: geoip-service
+  ports:
+    - name: grpc
+      port: 9090
+      targetPort: grpc
+    - name: internal-http
+      port: 8081
+      targetPort: internal-http

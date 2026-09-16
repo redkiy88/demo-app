@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package geoip;
+
+option go_package = "github.com/dmitriimoskin/geo-weather-app/proto/geoip";
+
+service GeoIPService {
+  rpc Lookup(LookupRequest) returns (LookupResponse);
+}
+
+message LookupRequest {
+  string ip = 1;
+}
+
+message LookupResponse {
+  string country = 1;
+  string city = 2;
+  double latitude = 3;
+  double longitude = 4;
+}

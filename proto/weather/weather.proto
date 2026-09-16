@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package weather;
+
+option go_package = "github.com/dmitriimoskin/geo-weather-app/proto/weather";
+
+service WeatherService {
+  rpc GetCurrent(GetCurrentRequest) returns (GetCurrentResponse);
+}
+
+message GetCurrentRequest {
+  double latitude = 1;
+  double longitude = 2;
+}
+
+message GetCurrentResponse {
+  double temperature_c = 1;
+  double windspeed_kmh = 2;
+  int32 weather_code = 3;
+  bool is_day = 4;
+}
