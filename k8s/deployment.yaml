@@ -21,12 +21,29 @@ spec:
       imagePullSecrets:
         - name: ghcr-creds
 
+      # The image runs as numeric UID/GID 10001 (see Dockerfile), so Kubernetes
+      # can verify runAsNonRoot.
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+
       containers:
         - name: demo-app
           image: ghcr.io/redkiy88/demo-app:1.0.0
 
           ports:
             - containerPort: 8080
+
+          # The app only logs to stdout and never writes to disk.
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
 
           readinessProbe:
             httpGet:
