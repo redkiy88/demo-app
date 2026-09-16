@@ -56,6 +56,8 @@ spec:
                 secretKeyRef:
                   name: maxmind
                   key: license_key
+            - name: GRPC_GO_LOG_SEVERITY_LEVEL
+              value: "ERROR"
 
           ports:
             - name: grpc

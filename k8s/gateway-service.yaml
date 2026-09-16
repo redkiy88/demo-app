@@ -32,6 +32,12 @@ spec:
               value: geoip-service:9090
             - name: WEATHER_ADDR
               value: weather-service:9090
+            # grpc-go logs connection retries (e.g. while Tempo is down) via
+            # the stdlib "log" package, which slog.SetDefault silently
+            # bridges into our JSON logs at INFO regardless of grpc-go's own
+            # (usually Info) severity judgement -- quiet that down to errors only.
+            - name: GRPC_GO_LOG_SEVERITY_LEVEL
+              value: "ERROR"
 
           ports:
             - name: http

@@ -54,6 +54,7 @@ func main() {
 
 	grpcServer := grpc.NewServer(
 		grpc.StatsHandler(otelgrpc.NewServerHandler()),
+		grpc.UnaryInterceptor(loggingInterceptor),
 	)
 	weatherpb.RegisterWeatherServiceServer(grpcServer, srv)
 

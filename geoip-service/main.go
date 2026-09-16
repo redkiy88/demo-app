@@ -65,6 +65,7 @@ func main() {
 
 	grpcServer := grpc.NewServer(
 		grpc.StatsHandler(otelgrpc.NewServerHandler()),
+		grpc.UnaryInterceptor(loggingInterceptor),
 	)
 	geoippb.RegisterGeoIPServiceServer(grpcServer, srv)
 

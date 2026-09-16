@@ -4,11 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"strconv"
 	"sync"
 	"time"
+
+	"go.opentelemetry.io/otel/trace"
 )
 
 const cacheTTL = 5 * time.Minute
@@ -89,11 +92,18 @@ func (c *weatherClient) fetch(ctx context.Context, lat, lon float64) (currentWea
 		return currentWeather{}, fmt.Errorf("build request: %w", err)
 	}
 
+	start := time.Now()
 	resp, err := c.httpClient.Do(req)
+	duration := time.Since(start).Milliseconds()
+	span := trace.SpanContextFromContext(ctx)
+
 	if err != nil {
+		slog.Error("outbound http request", "target", "open-meteo", "duration_ms", duration, "trace_id", span.TraceID().String(), "error", err)
 		return currentWeather{}, fmt.Errorf("call open-meteo: %w", err)
 	}
 	defer resp.Body.Close()
+
+	slog.Info("outbound http request", "target", "open-meteo", "status", resp.StatusCode, "duration_ms", duration, "trace_id", span.TraceID().String())
 
 	if resp.StatusCode != http.StatusOK {
 		return currentWeather{}, fmt.Errorf("open-meteo returned status %s", resp.Status)

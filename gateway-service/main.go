@@ -80,7 +80,7 @@ func main() {
 	mux.Handle("GET /api/whereami", whereami)
 	mux.Handle("POST /api/traces", traces)
 
-	handler := otelhttp.NewHandler(mux, "gateway-service")
+	handler := otelhttp.NewHandler(requestLogger(mux), "gateway-service")
 
 	server := &http.Server{
 		Addr:              httpAddr,

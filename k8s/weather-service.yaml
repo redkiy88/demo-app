@@ -27,6 +27,10 @@ spec:
         - name: weather-service
           image: ghcr.io/redkiy88/weather-service:sha-cdbbe90
 
+          env:
+            - name: GRPC_GO_LOG_SEVERITY_LEVEL
+              value: "ERROR"
+
           ports:
             - name: grpc
               containerPort: 9090
