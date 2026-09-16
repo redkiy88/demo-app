@@ -25,7 +25,7 @@ func getenv(key, fallback string) string {
 }
 
 func main() {
-	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil)).With("service", "weather-service")
 	slog.SetDefault(logger)
 
 	grpcAddr := getenv("GRPC_ADDR", ":9090")

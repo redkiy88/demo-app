@@ -26,7 +26,7 @@ func getenv(key, fallback string) string {
 }
 
 func main() {
-	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil)).With("service", "gateway-service")
 	slog.SetDefault(logger)
 
 	httpAddr := getenv("HTTP_ADDR", ":8080")

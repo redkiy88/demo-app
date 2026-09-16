@@ -25,7 +25,7 @@ func getenv(key, fallback string) string {
 }
 
 func main() {
-	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil)).With("service", "geoip-service")
 	slog.SetDefault(logger)
 
 	dbPath := getenv("DB_PATH", "/data/GeoLite2-City.mmdb")
