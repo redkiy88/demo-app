@@ -25,7 +25,7 @@ spec:
 
       containers:
         - name: gateway-service
-          image: ghcr.io/redkiy88/gateway-service:sha-cdbbe90
+          image: ghcr.io/redkiy88/gateway-service:sha-f844042
 
           env:
             - name: GEOIP_ADDR

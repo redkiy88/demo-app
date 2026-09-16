@@ -23,7 +23,7 @@ spec:
 
       containers:
         - name: frontend
-          image: ghcr.io/redkiy88/geo-weather-frontend:sha-cdbbe90
+          image: ghcr.io/redkiy88/geo-weather-frontend:sha-f844042
 
           ports:
             - name: http
